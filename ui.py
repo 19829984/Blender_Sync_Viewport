@@ -1,5 +1,4 @@
 import bpy
-from .operator_sync_view import SyncView_OT_Enable_Sync_Modal, SyncView_OT_Disable_Sync_Modal
 
 
 def menu_func(self, context):
