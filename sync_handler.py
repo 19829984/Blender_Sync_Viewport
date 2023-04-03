@@ -8,16 +8,15 @@ def update_space(source_space, target_space):
             if new_attribute is not None:
                 setattr(target, attribute, new_attribute)
 
-    # Update space attributes, causes 2 additional redraws on target
+    # Update space attributes
     space_attributes = ['clip_end', 'clip_start', 'lens']
     update_attributes(source_space, target_space, space_attributes)
+    
     # Update ViewRegion3D attributes
-    # All modifiable attributes, causes 8 additional redraws on target
+    # All modifiable attributes
     view_region_3d_attributes = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'show_sync_view', 'use_box_clip', 'use_clip_planes',
                                  'view_camera_offset', 'view_camera_zoom', 'view_distance', 'view_location', 'view_perspective', 'view_rotation']
     update_attributes(source_space.region_3d, target_space.region_3d, view_region_3d_attributes)
-
-# Issue: Our modal operator to report our mouse position is removed on loading a new file, and does not work on a new window
 
 
 class SyncDrawHandler:
@@ -43,7 +42,6 @@ class SyncDrawHandler:
 
         this_area = context.area
 
-        # Small optimization: Python evaluates conditions lazily, so if first conditions succeeds we don't need to do any work to check the second condition
         if this_area == self.active_area:
             self.source_area = this_area
             # For some reason updating another viewport causes this viewport to have an additional redraw, so we skip
