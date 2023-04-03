@@ -5,7 +5,7 @@ from .utils.registration import *
 
 class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     """
-    This operator reports mouse position to our draw handler, 
+    This operator reports mouse position to our draw handler,
     Adopted from https://blender.stackexchange.com/questions/267285/alternative-to-modal-operators-blocked-autosave
     """
     bl_idname = "syncview.report_mouse_pos"
