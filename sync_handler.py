@@ -11,7 +11,7 @@ def update_space(source_space, target_space):
     # Update space attributes
     space_attributes = ['clip_end', 'clip_start', 'lens']
     update_attributes(source_space, target_space, space_attributes)
-    
+
     # Update ViewRegion3D attributes
     # All modifiable attributes
     view_region_3d_attributes = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'show_sync_view', 'use_box_clip', 'use_clip_planes',
