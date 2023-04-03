@@ -5,14 +5,14 @@ from .utils.registration import *
 
 class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     """
-    This operator reports mouse position to our draw handler,
+    This operator reports mouse position to our draw handler, is meant to be called through a keymap on mouse move
     Adopted from https://blender.stackexchange.com/questions/267285/alternative-to-modal-operators-blocked-autosave
     """
     bl_idname = "syncview.report_mouse_pos"
     bl_label = "Report mouse position"
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
-        if (context is None) or (event is None) or (not context is None and context.region is None):
+        if (context is None) or (context.area is None):
             return {'PASS_THROUGH'}
 
         if 'view_sync' in bpy.app.driver_namespace:
@@ -28,9 +28,9 @@ class SyncView_OT_Enable_Sync(bpy.types.Operator):
     bl_label = "Enable Sync View Operator"
 
     def execute(self, context):
-        if 'view_sync' not in bpy.app.driver_namespace:
-            # context.window_manager.modal_handler_add(self)
-            bpy.app.driver_namespace['view_sync'] = SyncDrawHandler()
+        driver_namespace = bpy.app.driver_namespace
+        if 'view_sync' not in driver_namespace:
+            driver_namespace['view_sync'] = SyncDrawHandler()
         return {'FINISHED'}
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
