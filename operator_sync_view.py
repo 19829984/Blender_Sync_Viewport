@@ -5,11 +5,11 @@ from .utils.registration import *
 
 class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     """
-    This operator reports mouse position to our draw handler, is meant to be called through a keymap on mouse move
+    This operator reports the active area to our draw handler, is meant to be called through a keymap on mouse move
     Adopted from https://blender.stackexchange.com/questions/267285/alternative-to-modal-operators-blocked-autosave
     """
-    bl_idname = "syncview.report_mouse_pos"
-    bl_label = "Report mouse position"
+    bl_idname = "syncview.report_active_area"
+    bl_label = "Report Active Area"
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
         if (context is None) or (context.area is None):
@@ -21,7 +21,7 @@ class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
 
         return {'PASS_THROUGH'}
 
-
+#TODO: Enable sync and keybind with sync toggle, and disable them with sync toggle. 
 class SyncView_OT_Enable_Sync(bpy.types.Operator):
     """"""
     bl_idname = "syncview.syncview_enable_sync"
@@ -64,14 +64,14 @@ def register():
     # Keyamp bs: https://blender.stackexchange.com/questions/200811/is-there-a-reference-for-how-to-add-custom-keymaps-to-operators-in-an-addon
     if keyconfigs_addon:
         keymap_sync_view = keyconfigs_addon.keymaps.new(name="3D View", space_type='VIEW_3D')
-        keymap_sync_view.keymap_items.new(idname="syncview.report_mouse_pos", type='MOUSEMOVE', value='ANY')
+        keymap_sync_view.keymap_items.new(idname="syncview.report_active_area", type='MOUSEMOVE', value='ANY')
 
 
 def unregister():
     keyconfigs_addon = bpy.context.window_manager.keyconfigs.addon
     if keyconfigs_addon:
         keymap = keyconfigs_addon.keymaps.find("3D View", space_type="VIEW_3D")
-        keymap_item = keymap.keymap_items.find_from_operator(idname="syncview.report_mouse_pos")
+        keymap_item = keymap.keymap_items.find_from_operator(idname="syncview.report_active_area")
 
         keymap.keymap_items.remove(keymap_item)
         keyconfigs_addon.keymaps.remove(keymap)
