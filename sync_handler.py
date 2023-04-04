@@ -50,6 +50,8 @@ class SyncDrawHandler:
                 return
             self.skip_sync = True
 
+            #TODO: conditionally loop over all windows and screens to sync between windows.
+            #TODO: Try holding references to areas that needs drawing maybe?? Check how and when does areas change memory addresses
             for area in context.screen.areas:
                 if area.type == "VIEW_3D" and area != this_area:
                     if area.spaces[0].region_3d.show_sync_view:
