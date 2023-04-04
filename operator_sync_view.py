@@ -1,6 +1,7 @@
 import bpy
 from .sync_handler import SyncDrawHandler
 from .utils.registration import *
+import logging
 
 
 class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
@@ -11,25 +12,33 @@ class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     bl_idname = "syncview.report_active_area"
     bl_label = "Report Active Area"
 
-    def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
-        if (context is None) or (context.area is None):
-            return {'PASS_THROUGH'}
+    @classmethod
+    def poll(cls, context):
+        return context and context.area
 
+    def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
         if 'view_sync' in bpy.app.driver_namespace:
             view_sync = bpy.app.driver_namespace['view_sync']
             view_sync.active_area = context.area
+            view_sync.active_window = context.window
 
         return {'PASS_THROUGH'}
 
-#TODO: Enable sync and keybind with sync toggle, and disable them with sync toggle. 
+
 class SyncView_OT_Enable_Sync(bpy.types.Operator):
     """"""
     bl_idname = "syncview.syncview_enable_sync"
     bl_label = "Enable Sync View Operator"
 
+    @classmethod
+    def poll(cls, context):
+        return bpy.app.driver_namespace
+
     def execute(self, context):
         driver_namespace = bpy.app.driver_namespace
         if 'view_sync' not in driver_namespace:
+            logger = logging.getLogger(__name__ + ".SyncView_OT_Enable_Sync")
+            logger.info("Adding SyncDrawHandler to driver_namespace['view_sync']")
             driver_namespace['view_sync'] = SyncDrawHandler()
         return {'FINISHED'}
 
@@ -42,9 +51,15 @@ class SyncView_OT_Disable_Sync(bpy.types.Operator):
     bl_idname = "syncview.syncview_disable_sync"
     bl_label = "Disable Sync View Operator"
 
+    @classmethod
+    def poll(cls, context):
+        return bpy.app.driver_namespace
+
     def execute(self, context):
         driver_namespace = bpy.app.driver_namespace
         if 'view_sync' in driver_namespace and driver_namespace['view_sync'].has_handlers():
+            logger = logging.getLogger(__name__ + ".SyncView_OT_Disable_Sync")
+            logger.info("Removing SyncDrawHandler to driver_namespace['view_sync']")
             driver_namespace['view_sync'].remove_handler()
             del bpy.app.driver_namespace['view_sync']
 
@@ -63,15 +78,32 @@ def register():
     keyconfigs_addon = bpy.context.window_manager.keyconfigs.addon
     # Keyamp bs: https://blender.stackexchange.com/questions/200811/is-there-a-reference-for-how-to-add-custom-keymaps-to-operators-in-an-addon
     if keyconfigs_addon:
+        logger = logging.getLogger(__name__)
+        logger.info("Registering syncview.report_active_area to 3D View keymap")
+
         keymap_sync_view = keyconfigs_addon.keymaps.new(name="3D View", space_type='VIEW_3D')
-        keymap_sync_view.keymap_items.new(idname="syncview.report_active_area", type='MOUSEMOVE', value='ANY')
+        keymap_sync_view.keymap_items.new(idname="syncview.report_active_area", type='MOUSEMOVE', value='ANY', any=True)
 
 
 def unregister():
+    driver_namespace = bpy.app.driver_namespace
+    if 'view_sync' in driver_namespace and driver_namespace['view_sync'].has_handlers():
+        driver_namespace['view_sync'].remove_handlers()
+        del bpy.app.driver_namespace['view_sync']
+
+    # Reset attributes, it's not supposed to be True outside of this addon
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == "VIEW_3D":
+                area.spaces[0].region_3d.show_sync_view = False
+
     keyconfigs_addon = bpy.context.window_manager.keyconfigs.addon
     if keyconfigs_addon:
         keymap = keyconfigs_addon.keymaps.find("3D View", space_type="VIEW_3D")
         keymap_item = keymap.keymap_items.find_from_operator(idname="syncview.report_active_area")
+
+        logger = logging.getLogger(__name__)
+        logger.info("Removing syncview.report_active_area from 3D View keymap")
 
         keymap.keymap_items.remove(keymap_item)
         keyconfigs_addon.keymaps.remove(keymap)
