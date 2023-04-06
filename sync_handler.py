@@ -108,7 +108,7 @@ class SyncDrawHandler:
             case _:
                 self.__rebuild_window(new_window)
 
-    def build_space_map(self):
+    def build_map(self):
         self._lock_sync = True
         self.__rebuild_space_map(self._active_window)
         self._lock_sync = False
