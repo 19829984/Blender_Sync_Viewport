@@ -12,7 +12,7 @@ def register():
             logger.info("Enabling sync draw handler")
             bpy.ops.syncview.syncview_enable_sync()
         else:
-            bpy.app.driver_namespace['view_sync'].build_space_map()
+            bpy.app.driver_namespace['view_sync'].build_map()
 
     # Callback for when a viewport's show_sync_view RNA property changes
     key = (bpy.types.RegionView3D, "show_sync_view")
