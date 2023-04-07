@@ -19,7 +19,6 @@ class SyncView_EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     def execute(self, context: bpy.types.Context):
         if 'sync_view' in bpy.app.driver_namespace:
             sync_view = bpy.app.driver_namespace['sync_view']
-            sync_view.active_area = context.area
             sync_view.active_space = context.area.spaces.active
             sync_view.active_window = context.window
 
@@ -74,6 +73,7 @@ class SyncView_OT_DisableSync(bpy.types.Operator):
 
 
 class SyncView_OT_SyncAllVisible(bpy.types.Operator):
+    """Sync all visible viewports"""
     bl_idname = "syncview.sync_all_visible"
     bl_label = "Sync All Visible"
 
@@ -94,6 +94,7 @@ class SyncView_OT_SyncAllVisible(bpy.types.Operator):
 
 
 class SyncView_OT_StopSync(bpy.types.Operator):
+    """Disable sync on all visible viewports"""
     bl_idname = "syncview.stop_sync_all_visible"
     bl_label = "Stop Syncing Visible"
 
