@@ -1,5 +1,5 @@
 import bpy
-from typing import Set
+from typing import Set, List, Dict
 import logging
 import time
 import numpy as np
@@ -11,7 +11,7 @@ VIEW_REGION_3D_ATTRIBUTES_TO_CHECK = ['clip_planes', 'is_orthographic_side_view'
                                       'view_camera_zoom', 'view_camera_offset', 'view_matrix']
 
 
-def update_space(source_space, target_space):
+def update_space(source_space: bpy.types.Space, target_space: bpy.types.Space) -> None:
     def update_attributes(source, target, attributes):
         for attribute in attributes:
             new_attribute = getattr(source, attribute, None)
@@ -30,17 +30,17 @@ class SyncDrawHandler:
     def __init__(self):
         self.active_space: bpy.types.Space = None
 
-        self._handlers = []
-        self._active_window = None
+        self._handlers: List[object] = []
+        self._active_window: bpy.types.Window = None
         self._spaces: Set[bpy.types.Space] = set()
-        self._logger = logging.getLogger(__name__ + ".SyncDrawHandler")
-        self._space_map = dict()
-        self._preferences = bpy.context.preferences.addons[__package__].preferences
-        self._lock_sync = False  # Rendering is done on a separate thread, this is to prevent race conditions
-        self._last_viewport_attrs = []
+        self._logger: logging.Logger = logging.getLogger(__name__ + ".SyncDrawHandler")
+        self._space_map: Dict[bpy.types.Space, (bpy.types.WorkSpace, bpy.types.Screen)] = dict()
+        self._preferences: bpy.types.AddonPreferences = bpy.context.preferences.addons[__package__].preferences
+        self._lock_sync: bool = False  # Rendering is done on a separate thread, this is to prevent race conditions
+        self._last_viewport_attrs: list = []
         self.__add_handlers()
 
-    def set_active_window(self, new_window: bpy.types.Window):
+    def set_active_window(self, new_window: bpy.types.Window) -> None:
         self._lock_sync = True
         if self._active_window != new_window:
             self.__rebuild_space_map(new_window)
@@ -49,7 +49,7 @@ class SyncDrawHandler:
 
     active_window = property(fset=set_active_window)
 
-    def __rebuild_window(self, new_window: bpy.types.Window):
+    def __rebuild_window(self, new_window: bpy.types.Window) -> None:
         self._spaces = set()
         self._space_map = dict()
         if "sync_view.do_not_sync" not in new_window.screen:
@@ -58,7 +58,7 @@ class SyncDrawHandler:
                     self._spaces.add(area.spaces.active)
                     self._space_map[area.spaces.active] = (new_window.workspace, new_window.screen)
 
-    def __rebuild_space_map(self, new_window):
+    def __rebuild_space_map(self, new_window: bpy.types.Window) -> None:
         sync_mode = self._preferences.sync_modes[self._preferences.sync_mode]
         match sync_mode:
             case 0:  # Window Sync
@@ -115,13 +115,13 @@ class SyncDrawHandler:
 
     # Handler order: PRE_VIEW, POST_VIEW, POST_PIXEL
 
-    def __add_handlers(self):
+    def __add_handlers(self) -> None:
         self._handlers.append(bpy.types.SpaceView3D.draw_handler_add(
             self.sync_draw_callback, (), 'WINDOW', 'PRE_VIEW'))
         self._logger.info("Adding a sync view draw handler")
         self._logger.info("Handlers: " + str(self._handlers))
 
-    def __has_viewport_changed(self, space):
+    def __has_viewport_changed(self, space: bpy.types.Space) -> bool:
         # time_start = time.time()
         if not self._last_viewport_attrs:
             return False
@@ -145,7 +145,7 @@ class SyncDrawHandler:
         return False
 
     # Storing these attributes are inepensive, seems to be sub nanoseconds on a Ryzen 5900X
-    def __store_viewport_attrs(self, space):
+    def __store_viewport_attrs(self, space: bpy.types.Space) -> None:
         # time_start = time.time()
         self._last_viewport_attrs = []
         for attr in SPACE_ATTRIBUTES:
@@ -156,21 +156,21 @@ class SyncDrawHandler:
             self._last_viewport_attrs.append(np.array(getattr(space.region_3d, attr, None)))
         # self._logger.info("Time to store viewprt attrs " + str(time.time() - time_start))
 
-    def build_map(self):
+    def build_map(self) -> None:
         self._lock_sync = True
         self.__rebuild_space_map(self._active_window)
         self._lock_sync = False
 
-    def remove_handlers(self):
+    def remove_handlers(self) -> None:
         self._logger.info("Removing sync view draw handlers")
         for handler in self._handlers:
             bpy.types.SpaceView3D.draw_handler_remove(handler, 'WINDOW')
         self._handlers = []
 
-    def has_handlers(self):
+    def has_handlers(self) -> bool:
         return len(self._handlers) > 0
 
-    def sync_draw_callback(self):
+    def sync_draw_callback(self) -> None:
         this_space = bpy.context.space_data
 
         if self._preferences.pause_sync:
@@ -234,4 +234,3 @@ class SyncDrawHandler:
                 for space in self._spaces:
                     if space.region_3d.show_sync_view:
                         update_space(this_space, space)
-        return
