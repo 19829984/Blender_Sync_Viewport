@@ -170,8 +170,6 @@ class SyncDrawHandler:
     def has_handlers(self):
         return len(self._handlers) > 0
 
-    # TODO: Have option to turn off sync temporarily
-    # TODO: Have option to turn off sync during animation playback
     def sync_draw_callback(self):
         this_space = bpy.context.space_data
 
