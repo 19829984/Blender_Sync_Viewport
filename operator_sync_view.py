@@ -19,6 +19,7 @@ class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     def execute(self, context: bpy.types.Context):
         if 'view_sync' in bpy.app.driver_namespace:
             view_sync = bpy.app.driver_namespace['view_sync']
+            view_sync.active_area = context.area
             view_sync.active_space = context.area.spaces.active
             view_sync.active_window = context.window
 
@@ -28,7 +29,7 @@ class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
         return self.execute(context)
 
 
-class SyncView_OT_Enable_Sync(bpy.types.Operator):
+class SyncView_OT_EnableSync(bpy.types.Operator):
     """Enable sync view by initializing its draw handler callback"""
     bl_idname = "syncview.syncview_enable_sync"
     bl_label = "Enable Sync View Operator"
@@ -41,7 +42,7 @@ class SyncView_OT_Enable_Sync(bpy.types.Operator):
         driver_namespace = bpy.app.driver_namespace
         # TODO: Change view_sync to sync_view
         if 'view_sync' not in driver_namespace:
-            logger = logging.getLogger(__name__ + ".SyncView_OT_Enable_Sync")
+            logger = logging.getLogger(__name__ + ".SyncView_OT_EnableSync")
             logger.info("Adding SyncDrawHandler to driver_namespace['view_sync']")
             driver_namespace['view_sync'] = SyncDrawHandler()
         return {'FINISHED'}
@@ -50,7 +51,7 @@ class SyncView_OT_Enable_Sync(bpy.types.Operator):
         return self.execute(context)
 
 
-class SyncView_OT_Disable_Sync(bpy.types.Operator):
+class SyncView_OT_DisableSync(bpy.types.Operator):
     """Disable sync view by removing its draw handler callback"""
     bl_idname = "syncview.syncview_disable_sync"
     bl_label = "Disable Sync View Operator"
@@ -62,7 +63,7 @@ class SyncView_OT_Disable_Sync(bpy.types.Operator):
     def execute(self, context):
         driver_namespace = bpy.app.driver_namespace
         if 'view_sync' in driver_namespace and driver_namespace['view_sync'].has_handlers():
-            logger = logging.getLogger(__name__ + ".SyncView_OT_Disable_Sync")
+            logger = logging.getLogger(__name__ + ".SyncView_OT_DisableSync")
             logger.info("Removing SyncDrawHandler to driver_namespace['view_sync']")
             driver_namespace['view_sync'].remove_handler()
             del bpy.app.driver_namespace['view_sync']
@@ -73,7 +74,48 @@ class SyncView_OT_Disable_Sync(bpy.types.Operator):
         return self.execute(context)
 
 
-classes = [SyncView_OT_Enable_Sync, SyncView_OT_Disable_Sync, EVENTKEYMAP_OT_mouse_move]
+class SyncView_OT_SyncAllVisible(bpy.types.Operator):
+    bl_idname = "syncview.sync_all_visible"
+    bl_label = "Sync All Visible Viewports"
+
+    @classmethod
+    def poll(cls, context):
+        return context.region_data
+
+    def execute(self, context):
+        for window in context.window_manager.windows:
+            for area in window.screen.areas:
+                if area.type == "VIEW_3D":
+                    if area.spaces.active:
+                        area.spaces.active.region_3d.show_sync_view = True
+        return {'FINISHED'}
+
+    def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
+        return self.execute(context)
+
+
+class SyncView_OT_StopSync(bpy.types.Operator):
+    bl_idname = "syncview.stop_sync_all_visible"
+    bl_label = "Stop Syncing Visible Viewports"
+
+    @classmethod
+    def poll(cls, context):
+        return context.region_data
+
+    def execute(self, context):
+        for window in context.window_manager.windows:
+            for area in window.screen.areas:
+                if area.type == "VIEW_3D":
+                    if area.spaces.active:
+                        area.spaces.active.region_3d.show_sync_view = False
+        return {'FINISHED'}
+
+    def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
+        return self.execute(context)
+
+
+classes = [SyncView_OT_EnableSync, SyncView_OT_DisableSync,
+           SyncView_OT_SyncAllVisible, SyncView_OT_StopSync, EVENTKEYMAP_OT_mouse_move]
 
 
 def register():
