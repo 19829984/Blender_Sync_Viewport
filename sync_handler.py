@@ -8,7 +8,7 @@ SPACE_ATTRIBUTES = ['clip_end', 'clip_start', 'lens']
 VIEW_REGION_3D_ATTRIBUTES = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
                              'view_camera_offset', 'view_camera_zoom', 'view_distance', 'view_location', 'view_perspective', 'view_rotation']
 VIEW_REGION_3D_ATTRIBUTES_TO_CHECK = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
-                                      'view_camera_offset', 'view_camera_zoom', 'view_matrix']
+                                      'view_camera_zoom', 'view_camera_offset', 'view_matrix']
 
 
 def update_space(source_space, target_space):
@@ -131,30 +131,29 @@ class SyncDrawHandler:
                 # self._logger.info("0 Checking viewport change took " + str(time.time() - time_start))
                 return True
             view_port_attrs_index += 1
-        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[:-1]:
+        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[:-2]:
             if getattr(space.region_3d, attr, None) != self._last_viewport_attrs[view_port_attrs_index]:
                 # self._logger.info("1 Checking viewport change took " + str(time.time() - time_start))
                 return True
             view_port_attrs_index += 1
-        if not np.allclose(getattr(space.region_3d, VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[-1], None), self._last_viewport_attrs[view_port_attrs_index]):
-            # self._logger.info("2 Checking viewport change took " + str(time.time() - time_start))
-            return True
+        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[-2:]:
+            if not np.allclose(np.array(getattr(space.region_3d, attr, None)), self._last_viewport_attrs[view_port_attrs_index]):
+                # self._logger.info("2 Checking viewport change took " + str(time.time() - time_start))
+                return True
+            view_port_attrs_index += 1
         # self._logger.info("3 Checking viewport change took " + str(time.time() - time_start))
         return False
 
     # Storing these attributes are inepensive, seems to be sub nanoseconds on a Ryzen 5900X
     def __store_viewport_attrs(self, space):
         # time_start = time.time()
-        view_port_attrs_index = 0
         self._last_viewport_attrs = []
         for attr in SPACE_ATTRIBUTES:
             self._last_viewport_attrs.append(getattr(space, attr, None))
-            view_port_attrs_index += 1
-        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[:-1]:
+        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[:-2]:
             self._last_viewport_attrs.append(getattr(space.region_3d, attr, None))
-            view_port_attrs_index += 1
-        view_matrix = getattr(space.region_3d, "view_matrix", None)
-        self._last_viewport_attrs.append(np.array(view_matrix))
+        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[-2:]:
+            self._last_viewport_attrs.append(np.array(getattr(space.region_3d, attr, None)))
         # self._logger.info("Time to store viewprt attrs " + str(time.time() - time_start))
 
     def build_map(self):
@@ -171,16 +170,23 @@ class SyncDrawHandler:
     def has_handlers(self):
         return len(self._handlers) > 0
 
-    # TODO: Time our sync callback comapred to areas solution
-    # TODO: Figure out what view data is actually relevant
     # TODO: Have option to turn off sync temporarily
     # TODO: Have option to turn off sync during animation playback
     def sync_draw_callback(self):
-        if self._lock_sync:
-            print("Early return to due lock sync")
+        this_space = bpy.context.space_data
+
+        if self._preferences.pause_sync:
             return
 
-        this_space = bpy.context.space_data
+        if bpy.context.screen.is_animation_playing and self._preferences.pause_sync_during_playback:
+            return
+
+        if not self._preferences.sync_camera_view and bpy.context.space_data.region_3d.view_perspective == "CAMERA":
+            return
+
+        if self._lock_sync:
+            return
+
         if not bpy.context.region_data.show_sync_view or not self.active_space:
             self._spaces.discard(this_space)
             return
