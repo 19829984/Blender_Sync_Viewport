@@ -7,12 +7,12 @@ def register():
     owner = driver_namespace
 
     def sync_view_callback(*args):
-        if 'view_sync' not in bpy.app.driver_namespace:
+        if 'sync_view' not in bpy.app.driver_namespace:
             logger = logging.getLogger(__name__ + ".MsgBusSyncViewCallback")
             logger.info("Enabling sync draw handler")
             bpy.ops.syncview.syncview_enable_sync()
         else:
-            bpy.app.driver_namespace['view_sync'].build_map()
+            bpy.app.driver_namespace['sync_view'].build_map()
 
     # Callback for when a viewport's show_sync_view RNA property changes
     key = (bpy.types.RegionView3D, "show_sync_view")

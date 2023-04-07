@@ -17,11 +17,11 @@ class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
         return context and context.area
 
     def execute(self, context: bpy.types.Context):
-        if 'view_sync' in bpy.app.driver_namespace:
-            view_sync = bpy.app.driver_namespace['view_sync']
-            view_sync.active_area = context.area
-            view_sync.active_space = context.area.spaces.active
-            view_sync.active_window = context.window
+        if 'sync_view' in bpy.app.driver_namespace:
+            sync_view = bpy.app.driver_namespace['sync_view']
+            sync_view.active_area = context.area
+            sync_view.active_space = context.area.spaces.active
+            sync_view.active_window = context.window
 
         return {'PASS_THROUGH'}
 
@@ -40,11 +40,10 @@ class SyncView_OT_EnableSync(bpy.types.Operator):
 
     def execute(self, context):
         driver_namespace = bpy.app.driver_namespace
-        # TODO: Change view_sync to sync_view
-        if 'view_sync' not in driver_namespace:
+        if 'sync_view' not in driver_namespace:
             logger = logging.getLogger(__name__ + ".SyncView_OT_EnableSync")
-            logger.info("Adding SyncDrawHandler to driver_namespace['view_sync']")
-            driver_namespace['view_sync'] = SyncDrawHandler()
+            logger.info("Adding SyncDrawHandler to driver_namespace['sync_view']")
+            driver_namespace['sync_view'] = SyncDrawHandler()
         return {'FINISHED'}
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
@@ -62,11 +61,11 @@ class SyncView_OT_DisableSync(bpy.types.Operator):
 
     def execute(self, context):
         driver_namespace = bpy.app.driver_namespace
-        if 'view_sync' in driver_namespace and driver_namespace['view_sync'].has_handlers():
+        if 'sync_view' in driver_namespace and driver_namespace['sync_view'].has_handlers():
             logger = logging.getLogger(__name__ + ".SyncView_OT_DisableSync")
-            logger.info("Removing SyncDrawHandler to driver_namespace['view_sync']")
-            driver_namespace['view_sync'].remove_handler()
-            del bpy.app.driver_namespace['view_sync']
+            logger.info("Removing SyncDrawHandler to driver_namespace['sync_view']")
+            driver_namespace['sync_view'].remove_handler()
+            del bpy.app.driver_namespace['sync_view']
 
         return {'FINISHED'}
 
@@ -133,9 +132,9 @@ def register():
 
 def unregister():
     driver_namespace = bpy.app.driver_namespace
-    if 'view_sync' in driver_namespace and driver_namespace['view_sync'].has_handlers():
-        driver_namespace['view_sync'].remove_handlers()
-        del bpy.app.driver_namespace['view_sync']
+    if 'sync_view' in driver_namespace and driver_namespace['sync_view'].has_handlers():
+        driver_namespace['sync_view'].remove_handlers()
+        del bpy.app.driver_namespace['sync_view']
 
     # Reset attributes, it's not supposed to be True outside of this addon
     for window in bpy.context.window_manager.windows:

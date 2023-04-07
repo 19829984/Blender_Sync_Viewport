@@ -13,8 +13,8 @@ class SyncViewPreferences(AddonPreferences):
     }
 
     def enum_update(self, context):
-        if 'view_sync' in bpy.app.driver_namespace:
-            bpy.app.driver_namespace['view_sync'].build_map()
+        if 'sync_view' in bpy.app.driver_namespace:
+            bpy.app.driver_namespace['sync_view'].build_map()
 
     sync_mode: EnumProperty(
         name="Sync Mode",
