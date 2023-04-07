@@ -43,6 +43,7 @@ class SyncView_OT_EnableSync(bpy.types.Operator):
             logger = logging.getLogger(__name__ + ".SyncView_OT_EnableSync")
             logger.info("Adding SyncDrawHandler to driver_namespace['sync_view']")
             driver_namespace['sync_view'] = SyncDrawHandler()
+
         return {'FINISHED'}
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
@@ -87,6 +88,7 @@ class SyncView_OT_SyncAllVisible(bpy.types.Operator):
                 if area.type == "VIEW_3D":
                     if area.spaces.active:
                         area.spaces.active.region_3d.show_sync_view = True
+
         return {'FINISHED'}
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
@@ -108,6 +110,7 @@ class SyncView_OT_StopSync(bpy.types.Operator):
                 if area.type == "VIEW_3D":
                     if area.spaces.active:
                         area.spaces.active.region_3d.show_sync_view = False
+
         return {'FINISHED'}
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
