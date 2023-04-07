@@ -1,6 +1,6 @@
 import bpy
 from .sync_handler import SyncDrawHandler
-from .utils.registration import *
+from .utils.registration import register_classes, unregister_classes
 import logging
 
 
@@ -117,8 +117,12 @@ class SYNC_VIEWOT_StopSync(bpy.types.Operator):
         return self.execute(context)
 
 
-classes = [SYNC_VIEWOT_EnableSync, SYNC_VIEWOT_DisableSync,
-           SYNC_VIEWOT_SyncAllVisible, SYNC_VIEWOT_StopSync, SYNC_VIEWEVENTKEYMAP_OT_mouse_move]
+classes = [SYNC_VIEWOT_EnableSync,
+           SYNC_VIEWOT_DisableSync,
+           SYNC_VIEWOT_SyncAllVisible,
+           SYNC_VIEWOT_StopSync,
+           SYNC_VIEWEVENTKEYMAP_OT_mouse_move
+           ]
 
 
 def register():

@@ -1,9 +1,10 @@
 import bpy
 from typing import Set, List, Dict
 import logging
-import time
+# import time
 import numpy as np
 
+# TODO Separate it into 3 unique arrays
 SPACE_ATTRIBUTES = ['clip_end', 'clip_start', 'lens']
 VIEW_REGION_3D_ATTRIBUTES = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
                              'view_camera_offset', 'view_camera_zoom', 'view_distance', 'view_location', 'view_perspective', 'view_rotation']
@@ -213,15 +214,13 @@ class SyncDrawHandler:
                     case 0:  # Window Sync
                         self._spaces = {
                             space for space in self._spaces
-                            if (space.region_3d and
-                                self._space_map[space][1] == self._space_map[self.active_space][1]
+                            if (space.region_3d and self._space_map[space][1] == self._space_map[self.active_space][1]
                                 )
                         }
                     case 1:  # Workspace Sync
                         self._spaces = {
                             space for space in self._spaces
-                            if (space.region_3d and
-                                self._space_map[space][0] == self._space_map[self.active_space][0]
+                            if (space.region_3d and self._space_map[space][0] == self._space_map[self.active_space][0]
                                 )
                         }
                     case 2:  # All Sync
@@ -232,8 +231,7 @@ class SyncDrawHandler:
                     case _:  # Default to Window Sync
                         self._spaces = {
                             space for space in self._spaces
-                            if (space.region_3d and
-                                self._space_map[space][1] == self._space_map[self.active_space][1]
+                            if (space.region_3d and self._space_map[space][1] == self._space_map[self.active_space][1]
                                 )
                         }
                 self._spaces.remove(this_space)

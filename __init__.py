@@ -1,8 +1,3 @@
-import bpy
-import time
-from .utils.registration import *
-
-
 # Check if addon is being reloaded
 # This also allows script.reload() to reload the addon
 if "operator_sync_view" not in locals():

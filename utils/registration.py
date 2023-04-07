@@ -1,5 +1,4 @@
 import bpy
-import os
 
 
 def register_classes(classes):
