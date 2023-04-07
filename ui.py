@@ -16,7 +16,7 @@ class SyncViewPanel(bpy.types.Panel):
     bl_category = 'View'
 
 
-class VIEW3D_PT_sync_view_setting_panel(SyncViewPanel):
+class SyncView_VIEW3D_PT_setting_panel(SyncViewPanel):
     """Settings for Sync View"""
     bl_label = "Sync View Panel"
     bl_options = {'DEFAULT_CLOSED'}
@@ -38,10 +38,10 @@ class VIEW3D_PT_sync_view_setting_panel(SyncViewPanel):
         column.prop(preferences, "sync_camera_view")
 
 
-class VIEW3D_PT_sync_view_sync_mode(SyncViewPanel):
+class SyncView_VIEW3D_PT_sync_mode_panel(SyncViewPanel):
     """Settings for Sync View"""
     bl_label = "Sync Mode"
-    bl_parent_id = "VIEW3D_PT_sync_view_setting_panel"
+    bl_parent_id = "SyncView_VIEW3D_PT_setting_panel"
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -52,7 +52,7 @@ class VIEW3D_PT_sync_view_sync_mode(SyncViewPanel):
         box.props_enum(preferences, "sync_mode")
 
 
-ui = [VIEW3D_PT_sync_view_setting_panel, VIEW3D_PT_sync_view_sync_mode]
+ui = [SyncView_VIEW3D_PT_setting_panel, SyncView_VIEW3D_PT_sync_mode_panel]
 
 
 def register():
