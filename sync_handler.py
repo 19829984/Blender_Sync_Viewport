@@ -1,6 +1,14 @@
 import bpy
 from typing import Set
 import logging
+import time
+import numpy as np
+
+SPACE_ATTRIBUTES = ['clip_end', 'clip_start', 'lens']
+VIEW_REGION_3D_ATTRIBUTES = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
+                             'view_camera_offset', 'view_camera_zoom', 'view_distance', 'view_location', 'view_perspective', 'view_rotation']
+VIEW_REGION_3D_ATTRIBUTES_TO_CHECK = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
+                                      'view_camera_offset', 'view_camera_zoom', 'view_matrix']
 
 
 def update_space(source_space, target_space):
@@ -11,14 +19,11 @@ def update_space(source_space, target_space):
                 setattr(target, attribute, new_attribute)
 
     # Update space attributes
-    space_attributes = ['clip_end', 'clip_start', 'lens']
-    update_attributes(source_space, target_space, space_attributes)
+    update_attributes(source_space, target_space, SPACE_ATTRIBUTES)
 
     # Update ViewRegion3D attributes
     # All modifiable attributes
-    view_region_3d_attributes = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
-                                 'view_camera_offset', 'view_camera_zoom', 'view_distance', 'view_location', 'view_perspective', 'view_rotation']
-    update_attributes(source_space.region_3d, target_space.region_3d, view_region_3d_attributes)
+    update_attributes(source_space.region_3d, target_space.region_3d, VIEW_REGION_3D_ATTRIBUTES)
 
 
 class SyncDrawHandler:
@@ -27,12 +32,12 @@ class SyncDrawHandler:
 
         self._handlers = []
         self._active_window = None
-        self._skip_sync: bool = False
         self._spaces: Set[bpy.types.Space] = set()
         self._logger = logging.getLogger(__name__ + ".SyncDrawHandler")
         self._space_map = dict()
         self._preferences = bpy.context.preferences.addons[__package__].preferences
         self._lock_sync = False  # Rendering is done on a separate thread, this is to prevent race conditions
+        self._last_viewport_attrs = []
         self.__add_handlers()
 
     def set_active_window(self, new_window: bpy.types.Window):
@@ -108,11 +113,6 @@ class SyncDrawHandler:
             case _:
                 self.__rebuild_window(new_window)
 
-    def build_map(self):
-        self._lock_sync = True
-        self.__rebuild_space_map(self._active_window)
-        self._lock_sync = False
-
     # Handler order: PRE_VIEW, POST_VIEW, POST_PIXEL
 
     def __add_handlers(self):
@@ -120,6 +120,47 @@ class SyncDrawHandler:
             self.sync_draw_callback, (), 'WINDOW', 'PRE_VIEW'))
         self._logger.info("Adding a sync view draw handler")
         self._logger.info("Handlers: " + str(self._handlers))
+
+    def __has_viewport_changed(self, space):
+        # time_start = time.time()
+        if not self._last_viewport_attrs:
+            return False
+        view_port_attrs_index = 0
+        for attr in SPACE_ATTRIBUTES:
+            if getattr(space, attr, None) != self._last_viewport_attrs[view_port_attrs_index]:
+                # self._logger.info("0 Checking viewport change took " + str(time.time() - time_start))
+                return True
+            view_port_attrs_index += 1
+        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[:-1]:
+            if getattr(space.region_3d, attr, None) != self._last_viewport_attrs[view_port_attrs_index]:
+                # self._logger.info("1 Checking viewport change took " + str(time.time() - time_start))
+                return True
+            view_port_attrs_index += 1
+        if not np.allclose(getattr(space.region_3d, VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[-1], None), self._last_viewport_attrs[view_port_attrs_index]):
+            # self._logger.info("2 Checking viewport change took " + str(time.time() - time_start))
+            return True
+        # self._logger.info("3 Checking viewport change took " + str(time.time() - time_start))
+        return False
+
+    # Storing these attributes are inepensive, seems to be sub nanoseconds on a Ryzen 5900X
+    def __store_viewport_attrs(self, space):
+        # time_start = time.time()
+        view_port_attrs_index = 0
+        self._last_viewport_attrs = []
+        for attr in SPACE_ATTRIBUTES:
+            self._last_viewport_attrs.append(getattr(space, attr, None))
+            view_port_attrs_index += 1
+        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK[:-1]:
+            self._last_viewport_attrs.append(getattr(space.region_3d, attr, None))
+            view_port_attrs_index += 1
+        view_matrix = getattr(space.region_3d, "view_matrix", None)
+        self._last_viewport_attrs.append(np.array(view_matrix))
+        # self._logger.info("Time to store viewprt attrs " + str(time.time() - time_start))
+
+    def build_map(self):
+        self._lock_sync = True
+        self.__rebuild_space_map(self._active_window)
+        self._lock_sync = False
 
     def remove_handlers(self):
         self._logger.info("Removing sync view draw handlers")
@@ -131,8 +172,12 @@ class SyncDrawHandler:
         return len(self._handlers) > 0
 
     # TODO: Time our sync callback comapred to areas solution
+    # TODO: Figure out what view data is actually relevant
+    # TODO: Have option to turn off sync temporarily
+    # TODO: Have option to turn off sync during animation playback
     def sync_draw_callback(self):
         if self._lock_sync:
+            print("Early return to due lock sync")
             return
 
         this_space = bpy.context.space_data
@@ -144,47 +189,45 @@ class SyncDrawHandler:
         # because for some reason those two can be different
         self._space_map[this_space] = (bpy.context.window_manager.windows[0].workspace, bpy.context.screen)
         self._spaces.add(this_space)
-
         # Sync other viewports
         if this_space == self.active_space:
-            # For some reason updating another viewport causes this viewport to have an additional redraw, so we skip
-            if self._skip_sync:
-                self._skip_sync = False
-                return
-            self._skip_sync = True
+            if not self._last_viewport_attrs:
+                self.__store_viewport_attrs(this_space)
+            elif (self.__has_viewport_changed(this_space)):
+                self.__store_viewport_attrs(this_space)
 
-            # Cleanup invalid spaces
-            sync_mode = self._preferences.sync_modes[self._preferences.sync_mode]
-            # Use .region_3d to check if viewport is still valid
-            match sync_mode:
-                case 0:  # Window Sync
-                    self._spaces = {
-                        space for space in self._spaces
-                        if (space.region_3d and
-                            self._space_map[space][1] == self._space_map[self.active_space][1]
-                            )
-                    }
-                case 1:  # Workspace Sync
-                    self._spaces = {
-                        space for space in self._spaces
-                        if (space.region_3d and
-                            self._space_map[space][0] == self._space_map[self.active_space][0]
-                            )
-                    }
-                case 2:  # All Sync
-                    self._spaces = {
-                        space for space in self._spaces
-                        if space.region_3d
-                    }
-                case _:  # Default to Window Sync
-                    self._spaces = {
-                        space for space in self._spaces
-                        if (space.region_3d and
-                            self._space_map[space][1] == self._space_map[self.active_space][1]
-                            )
-                    }
-            self._spaces.remove(this_space)
-            for space in self._spaces:
-                if space.region_3d.show_sync_view:
-                    update_space(this_space, space)
+                # Cleanup invalid spaces
+                sync_mode = self._preferences.sync_modes[self._preferences.sync_mode]
+                # Use .region_3d to check if viewport is still valid
+                match sync_mode:
+                    case 0:  # Window Sync
+                        self._spaces = {
+                            space for space in self._spaces
+                            if (space.region_3d and
+                                self._space_map[space][1] == self._space_map[self.active_space][1]
+                                )
+                        }
+                    case 1:  # Workspace Sync
+                        self._spaces = {
+                            space for space in self._spaces
+                            if (space.region_3d and
+                                self._space_map[space][0] == self._space_map[self.active_space][0]
+                                )
+                        }
+                    case 2:  # All Sync
+                        self._spaces = {
+                            space for space in self._spaces
+                            if space.region_3d
+                        }
+                    case _:  # Default to Window Sync
+                        self._spaces = {
+                            space for space in self._spaces
+                            if (space.region_3d and
+                                self._space_map[space][1] == self._space_map[self.active_space][1]
+                                )
+                        }
+                self._spaces.remove(this_space)
+                for space in self._spaces:
+                    if space.region_3d.show_sync_view:
+                        update_space(this_space, space)
         return
