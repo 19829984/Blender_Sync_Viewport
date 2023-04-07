@@ -176,7 +176,7 @@ class SyncDrawHandler:
         if self._preferences.pause_sync:
             return
 
-        if bpy.context.screen.is_animation_playing and self._preferences.pause_sync_during_playback:
+        if bpy.context.screen.is_animation_playing and not self._preferences.sync_playback:
             return
 
         if not self._preferences.sync_camera_view and bpy.context.space_data.region_3d.view_perspective == "CAMERA":

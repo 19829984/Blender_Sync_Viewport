@@ -34,15 +34,15 @@ class SyncViewPreferences(AddonPreferences):
         default=False,
     )
 
-    pause_sync_during_playback: BoolProperty(
-        name="Pause Sync During Playback",
-        description="Pause Sync During Playback",
-        default=False,
+    sync_playback: BoolProperty(
+        name="Sync Playback",
+        description="Sync During Playback",
+        default=True,
     )
 
     sync_camera_view: BoolProperty(
-        name="Sync viewports in camera view",
-        description="Sync viewports in camera view",
+        name="Sync Camera View",
+        description="Sync Viewports in Camera View",
         default=True,
     )
 
@@ -51,7 +51,7 @@ class SyncViewPreferences(AddonPreferences):
         layout.props_enum(self, "sync_mode")
         row = layout.row()
         row.prop(self, "pause_sync")
-        row.prop(self, "pause_sync_during_playback")
+        row.prop(self, "sync_playback")
         row.prop(self, "sync_camera_view")
 
 

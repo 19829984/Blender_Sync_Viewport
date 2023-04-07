@@ -75,7 +75,7 @@ class SyncView_OT_DisableSync(bpy.types.Operator):
 
 class SyncView_OT_SyncAllVisible(bpy.types.Operator):
     bl_idname = "syncview.sync_all_visible"
-    bl_label = "Sync All Visible Viewports"
+    bl_label = "Sync All Visible"
 
     @classmethod
     def poll(cls, context):
@@ -95,7 +95,7 @@ class SyncView_OT_SyncAllVisible(bpy.types.Operator):
 
 class SyncView_OT_StopSync(bpy.types.Operator):
     bl_idname = "syncview.stop_sync_all_visible"
-    bl_label = "Stop Syncing Visible Viewports"
+    bl_label = "Stop Syncing Visible"
 
     @classmethod
     def poll(cls, context):

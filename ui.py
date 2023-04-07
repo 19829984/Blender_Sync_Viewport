@@ -33,9 +33,9 @@ class SyncView_VIEW3D_PT_setting_panel(SyncViewPanel):
 
         layout.label(text="Settings")
         column = layout.column()
-        column.prop(preferences, "pause_sync")
-        column.prop(preferences, "pause_sync_during_playback")
-        column.prop(preferences, "sync_camera_view")
+        column.prop(preferences, "pause_sync", icon='PAUSE')
+        column.prop(preferences, "sync_playback", icon='PLAY')
+        column.prop(preferences, "sync_camera_view", icon='VIEW_CAMERA')
 
 
 class SyncView_VIEW3D_PT_sync_mode_panel(SyncViewPanel):
