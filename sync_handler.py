@@ -173,6 +173,12 @@ class SyncDrawHandler:
     def sync_draw_callback(self) -> None:
         this_space = bpy.context.space_data
 
+        # Disable sync if in quadview to prevent issues
+        if len(this_space.region_quadviews) > 1:
+            if this_space.region_3d.show_sync_view:
+                this_space.region_3d.show_sync_view = False
+            return
+
         if self._preferences.pause_sync:
             return
 

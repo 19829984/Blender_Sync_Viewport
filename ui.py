@@ -25,7 +25,9 @@ class SYNC_VIEWVIEW3D_PT_setting_panel(SyncViewPanel):
         layout = self.layout
         preferences = bpy.context.preferences.addons[__package__].preferences
         view_region = context.area.spaces[0].region_3d
-        layout.prop(view_region, "show_sync_view", text="Sync This Viewport", icon_only=True, icon="UV_SYNC_SELECT")
+        # Disable if in quadview
+        if len(context.space_data.region_quadviews) <= 1:
+            layout.prop(view_region, "show_sync_view", text="Sync This Viewport", icon_only=True, icon="UV_SYNC_SELECT")
 
         layout.label(text="Shortcuts")
         layout.operator(operator="syncview.sync_all_visible")
