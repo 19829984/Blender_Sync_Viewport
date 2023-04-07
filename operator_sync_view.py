@@ -4,7 +4,7 @@ from .utils.registration import *
 import logging
 
 
-class EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
+class SyncView_EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     """
     This operator reports the active area to our draw handler, is meant to be called through a keymap on mouse move
     Adopted from https://blender.stackexchange.com/questions/267285/alternative-to-modal-operators-blocked-autosave
@@ -114,7 +114,7 @@ class SyncView_OT_StopSync(bpy.types.Operator):
 
 
 classes = [SyncView_OT_EnableSync, SyncView_OT_DisableSync,
-           SyncView_OT_SyncAllVisible, SyncView_OT_StopSync, EVENTKEYMAP_OT_mouse_move]
+           SyncView_OT_SyncAllVisible, SyncView_OT_StopSync, SyncView_EVENTKEYMAP_OT_mouse_move]
 
 
 def register():
