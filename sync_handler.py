@@ -40,24 +40,27 @@ class SyncDrawHandler:
 
     def __rebuild_space_map_window(self, new_window: bpy.types.Window) -> None:
         '''Rebuild the space map for each viewport in the current window tagged for sync'''
-        self._space_map = dict()
         if "sync_view.do_not_sync" not in new_window.screen:
-            for area in new_window.screen.areas:
-                if area.type == 'VIEW_3D' and area.spaces.active.region_3d.show_sync_view:
-                    self._space_map[area.spaces.active] = (new_window.workspace, new_window.screen)
+            self._space_map = {
+                area.spaces.active: (new_window.workspace, new_window.screen)
+                for area in new_window.screen.areas
+                if area.type == 'VIEW_3D' and area.spaces.active.region_3d.show_sync_view
+            }
 
     def __rebuild_space_map(self, new_window: bpy.types.Window) -> None:
         '''
         Clear and rebuild the space map depending on the current sync mode
 
-        This populates _space_map with key value pairs that maps a space to 
+        This populates _space_map with key value pairs that maps a space to
         a tuple containing its workspace and screen{space : (workspace, screen)}
         '''
         sync_mode = self._preferences.sync_modes[self._preferences.sync_mode]
         match sync_mode:
-            case 0:  # Window Sync
+            # Window Sync
+            case 0:
                 self.__rebuild_space_map_window(new_window)
-            case 1:  # Workspace sync
+            # Workspace sync
+            case 1:
                 # Rebuild the space map for each viewport in the current workspace tagged for sync
                 self._space_map = dict()
 
@@ -67,7 +70,9 @@ class SyncDrawHandler:
                 workspace, screens = workspace_window_any.workspace, workspace_window_any.workspace.screens
 
                 valid_screens = {
-                    window.screen for window in bpy.context.window_manager.windows if "sync_view.do_not_sync" not in window.screen}
+                    window.screen for window in bpy.context.window_manager.windows
+                    if "sync_view.do_not_sync" not in window.screen
+                }
                 for screen in screens:
                     if screen in valid_screens and hasattr(screen, "areas"):
                         for area in screen.areas:
@@ -76,7 +81,8 @@ class SyncDrawHandler:
                                 self._space_map[active_space] = (workspace, screen)
                     else:  # These should be screens that are closed in the current workspace
                         screen["sync_view.do_not_sync"] = True
-            case 2:  # All Sync
+            # All Sync
+            case 2:
                 # Rebuild the space map for all viewport in the blend file tagged for sync
                 self._space_map = dict()
 
@@ -85,11 +91,14 @@ class SyncDrawHandler:
                 workspace_window_any = bpy.context.window_manager.windows[0]
                 workspace_screens = set(workspace_window_any.workspace.screens)
                 valid_workspace_screens = {
-                    window.screen for window in bpy.context.window_manager.windows if "sync_view.do_not_sync" not in window.screen}
+                    window.screen for window in bpy.context.window_manager.windows
+                    if "sync_view.do_not_sync" not in window.screen
+                }
                 # We cannot be certain if a screen outside of the current workspace is closed and should not be synced
                 other_workspace_screens = {
                     screen for screen in bpy.context.blend_data.screens
-                    if ("sync_view.do_not_sync" not in screen and screen not in workspace_screens)}
+                    if ("sync_view.do_not_sync" not in screen and screen not in workspace_screens)
+                }
 
                 screens = valid_workspace_screens.union(other_workspace_screens)
 
@@ -139,13 +148,9 @@ class SyncDrawHandler:
     # Storing these attributes are inepensive, seems to be sub nanoseconds on a Ryzen 5900X
     def __store_viewport_attrs(self, space: bpy.types.Space) -> None:
         # time_start = time.time()
-        self._last_viewport_attrs = []
-        for attr in SPACE_ATTRIBUTES:
-            self._last_viewport_attrs.append(getattr(space, attr, None))
-        for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK:
-            self._last_viewport_attrs.append(getattr(space.region_3d, attr, None))
-        for attr in VIEW_REGION_3D_ARRAY_ATTRIBUTES_TO_CHECK:
-            self._last_viewport_attrs.append(np.array(getattr(space.region_3d, attr, None)))
+        self._last_viewport_attrs = [getattr(space, attr, None) for attr in SPACE_ATTRIBUTES]
+        self._last_viewport_attrs += [getattr(space.region_3d, attr, None) for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK]
+        self._last_viewport_attrs += [np.array(getattr(space.region_3d, attr, None)) for attr in VIEW_REGION_3D_ARRAY_ATTRIBUTES_TO_CHECK]
         # self._logger.info("Time to store viewprt attrs " + str(time.time() - time_start))
 
     def __update_space(self, target_space: bpy.types.Space) -> None:
@@ -221,14 +226,12 @@ class SyncDrawHandler:
                     case 0:  # Window Sync
                         spaces_to_sync = {
                             space for space in spaces
-                            if (space.region_3d and self._space_map[space][1] == self._space_map[self.active_space][1]
-                                )
+                            if (space.region_3d and self._space_map[space][1] == self._space_map[self.active_space][1])
                         }
                     case 1:  # Workspace Sync
                         spaces_to_sync = {
                             space for space in spaces
-                            if (space.region_3d and self._space_map[space][0] == self._space_map[self.active_space][0]
-                                )
+                            if (space.region_3d and self._space_map[space][0] == self._space_map[self.active_space][0])
                         }
                     case 2:  # All Sync
                         spaces_to_sync = {
@@ -238,8 +241,7 @@ class SyncDrawHandler:
                     case _:  # Default to Window Sync
                         spaces_to_sync = {
                             space for space in spaces
-                            if (space.region_3d and self._space_map[space][1] == self._space_map[self.active_space][1]
-                                )
+                            if (space.region_3d and self._space_map[space][1] == self._space_map[self.active_space][1])
                         }
                 spaces_to_sync.remove(this_space)
                 for space in spaces_to_sync:
