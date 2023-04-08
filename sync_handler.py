@@ -1,7 +1,6 @@
 import bpy
 from typing import List, Dict
 import logging
-# import time
 import numpy as np
 
 SPACE_ATTRIBUTES = ["clip_end", "clip_start", "lens"]
@@ -123,35 +122,28 @@ class SyncDrawHandler:
         self._logger.info("Handlers: " + str(self._handlers))
 
     def __has_viewport_changed(self, space: bpy.types.Space) -> bool:
-        # time_start = time.time()
         if not self._last_viewport_attrs:
             return False
         view_port_attrs_index = 0
         for attr in SPACE_ATTRIBUTES:
             if getattr(space, attr, None) != self._last_viewport_attrs[view_port_attrs_index]:
-                # self._logger.info("0 Checking viewport change took " + str(time.time() - time_start))
                 return True
             view_port_attrs_index += 1
         for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK:
             if getattr(space.region_3d, attr, None) != self._last_viewport_attrs[view_port_attrs_index]:
-                # self._logger.info("1 Checking viewport change took " + str(time.time() - time_start))
                 return True
             view_port_attrs_index += 1
         for attr in VIEW_REGION_3D_ARRAY_ATTRIBUTES_TO_CHECK:
             if not np.allclose(np.array(getattr(space.region_3d, attr, None)), self._last_viewport_attrs[view_port_attrs_index]):
-                # self._logger.info("2 Checking viewport change took " + str(time.time() - time_start))
                 return True
             view_port_attrs_index += 1
-        # self._logger.info("3 Checking viewport change took " + str(time.time() - time_start))
         return False
 
     # Storing these attributes are inepensive, seems to be sub nanoseconds on a Ryzen 5900X
     def __store_viewport_attrs(self, space: bpy.types.Space) -> None:
-        # time_start = time.time()
         self._last_viewport_attrs = [getattr(space, attr, None) for attr in SPACE_ATTRIBUTES]
         self._last_viewport_attrs += [getattr(space.region_3d, attr, None) for attr in VIEW_REGION_3D_ATTRIBUTES_TO_CHECK]
         self._last_viewport_attrs += [np.array(getattr(space.region_3d, attr, None)) for attr in VIEW_REGION_3D_ARRAY_ATTRIBUTES_TO_CHECK]
-        # self._logger.info("Time to store viewprt attrs " + str(time.time() - time_start))
 
     def __update_space(self, target_space: bpy.types.Space) -> None:
         def copy_attributes(source: object, target: object, attributes: List[str]) -> None:
