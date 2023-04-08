@@ -50,9 +50,9 @@ class SyncViewPreferences(AddonPreferences):
         layout = self.layout
         layout.props_enum(self, "sync_mode")
         row = layout.row()
-        row.prop(self, "pause_sync")
-        row.prop(self, "sync_playback")
-        row.prop(self, "sync_camera_view")
+        row.prop(self, "pause_sync", icon='PAUSE')
+        row.prop(self, "sync_playback", icon='PLAY')
+        row.prop(self, "sync_camera_view", icon='VIEW_CAMERA')
 
 
 def register():
