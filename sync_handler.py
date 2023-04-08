@@ -1,18 +1,15 @@
 import bpy
-from typing import Set, List, Dict
+from typing import List, Dict
 import logging
 # import time
 import numpy as np
 
-# TODO Separate it into 3 unique arrays
 SPACE_ATTRIBUTES = ["clip_end", "clip_start", "lens"]
 VIEW_REGION_3D_ATTRIBUTES = ["clip_planes", "is_orthographic_side_view", "is_perspective", "lock_rotation", "use_box_clip", "use_clip_planes",
                              "view_camera_offset", "view_camera_zoom", "view_distance", "view_location", "view_perspective", "view_rotation"]
 VIEW_REGION_3D_ATTRIBUTES_TO_CHECK = ["is_orthographic_side_view", "is_perspective", "lock_rotation", "use_box_clip", "use_clip_planes",
                                       "view_camera_zoom"]
 VIEW_REGION_3D_ARRAY_ATTRIBUTES_TO_CHECK = ["clip_planes", "view_camera_offset", "view_matrix"]
-
-# TODO: Make this a member function to avoid passing in source_space
 
 
 class SyncDrawHandler:
