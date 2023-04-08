@@ -5,13 +5,13 @@ import logging
 import numpy as np
 
 # TODO Separate it into 3 unique arrays
-SPACE_ATTRIBUTES = ['clip_end', 'clip_start', 'lens']
-VIEW_REGION_3D_ATTRIBUTES = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
-                             'view_camera_offset', 'view_camera_zoom', 'view_distance', 'view_location', 'view_perspective', 'view_rotation']
-VIEW_REGION_3D_ATTRIBUTES_TO_CHECK = ['clip_planes', 'is_orthographic_side_view', 'is_perspective', 'lock_rotation', 'use_box_clip', 'use_clip_planes',
-                                      'view_camera_zoom', 'view_camera_offset', 'view_matrix']
+SPACE_ATTRIBUTES = ["clip_end", "clip_start", "lens"]
+VIEW_REGION_3D_ATTRIBUTES = ["clip_planes", "is_orthographic_side_view", "is_perspective", "lock_rotation", "use_box_clip", "use_clip_planes",
+                             "view_camera_offset", "view_camera_zoom", "view_distance", "view_location", "view_perspective", "view_rotation"]
+VIEW_REGION_3D_ATTRIBUTES_TO_CHECK = ["clip_planes", "is_orthographic_side_view", "is_perspective", "lock_rotation", "use_box_clip", "use_clip_planes",
+                                      "view_camera_zoom", "view_camera_offset", "view_matrix"]
 
-
+# TODO: Make this a member function to avoid passing in source_space
 def update_space(source_space: bpy.types.Space, target_space: bpy.types.Space) -> None:
     def update_attributes(source, target, attributes):
         for attribute in attributes:
@@ -55,7 +55,7 @@ class SyncDrawHandler:
         self._space_map = dict()
         if "sync_view.do_not_sync" not in new_window.screen:
             for area in new_window.screen.areas:
-                if area.type == "VIEW_3D" and area.spaces.active.region_3d.show_sync_view:
+                if area.type == 'VIEW_3D' and area.spaces.active.region_3d.show_sync_view:
                     self._spaces.add(area.spaces.active)
                     self._space_map[area.spaces.active] = (new_window.workspace, new_window.screen)
 
@@ -79,7 +79,7 @@ class SyncDrawHandler:
                     if screen in valid_screens and hasattr(screen, "areas"):
                         for area in screen.areas:
                             active_space = area.spaces.active
-                            if area.type == "VIEW_3D" and active_space and active_space.region_3d.show_sync_view:
+                            if area.type == 'VIEW_3D' and active_space and active_space.region_3d.show_sync_view:
                                 self._spaces.add(active_space)
                                 self._space_map[active_space] = (workspace, screen)
                     else:  # These should be screens that are closed in the current workspace
@@ -106,7 +106,7 @@ class SyncDrawHandler:
                         if screen in screens and hasattr(screen, "areas"):
                             for area in screen.areas:
                                 active_space = area.spaces.active
-                                if area.type == "VIEW_3D" and active_space and active_space.region_3d.show_sync_view:
+                                if area.type == 'VIEW_3D' and active_space and active_space.region_3d.show_sync_view:
                                     self._spaces.add(active_space)
                                     self._space_map[active_space] = (workspace_window_any.workspace, screen)
                         else:  # These should be screens that are closed in the current workspace
@@ -186,7 +186,7 @@ class SyncDrawHandler:
         if bpy.context.screen.is_animation_playing and not self._preferences.sync_playback:
             return
 
-        if not self._preferences.sync_camera_view and bpy.context.space_data.region_3d.view_perspective == "CAMERA":
+        if not self._preferences.sync_camera_view and bpy.context.space_data.region_3d.view_perspective == 'CAMERA':
             return
 
         if self._lock_sync:

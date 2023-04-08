@@ -7,9 +7,9 @@ class SyncViewPreferences(AddonPreferences):
     bl_idname = __package__
 
     sync_modes = {
-        'Window': 0,
-        'Workspace': 1,
-        'All': 2
+        "Window": 0,
+        "Workspace": 1,
+        "All": 2
     }
 
     def enum_update(self, context):
@@ -19,9 +19,9 @@ class SyncViewPreferences(AddonPreferences):
     sync_mode: EnumProperty(
         name="Sync Mode",
         items=[
-            ('Window', 'Sync Window', 'Sync viewports within the same window', 'WINDOW', 0),
-            ('Workspace', 'Sync Workspace', 'Sync viewports within the same workspace', 'WORKSPACE', 1),
-            ('All', 'Sync All', 'Sync all viewports in the blend file', 'FILE_BLEND', 2)
+            ("Window", "Sync Window", "Sync viewports within the same window", 'WINDOW', 0),
+            ("Workspace", "Sync Workspace", "Sync viewports within the same workspace", 'WORKSPACE', 1),
+            ("All", "Sync All", "Sync all viewports in the blend file", 'FILE_BLEND', 2)
         ],
         description="Determines what viewports to sync",
         default=0,

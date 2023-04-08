@@ -85,7 +85,7 @@ class SYNC_VIEWOT_SyncAllVisible(bpy.types.Operator):
     def execute(self, context):
         for window in context.window_manager.windows:
             for area in window.screen.areas:
-                if area.type == "VIEW_3D":
+                if area.type == 'VIEW_3D':
                     if area.spaces.active:
                         area.spaces.active.region_3d.show_sync_view = True
 
@@ -107,7 +107,7 @@ class SYNC_VIEWOT_StopSync(bpy.types.Operator):
     def execute(self, context):
         for window in context.window_manager.windows:
             for area in window.screen.areas:
-                if area.type == "VIEW_3D":
+                if area.type == 'VIEW_3D':
                     if area.spaces.active:
                         area.spaces.active.region_3d.show_sync_view = False
 
@@ -147,12 +147,12 @@ def unregister():
     # Reset attributes, it's not supposed to be True outside of this addon
     for window in bpy.context.window_manager.windows:
         for area in window.screen.areas:
-            if area.type == "VIEW_3D":
+            if area.type == 'VIEW_3D':
                 area.spaces[0].region_3d.show_sync_view = False
 
     keyconfigs_addon = bpy.context.window_manager.keyconfigs.addon
     if keyconfigs_addon:
-        keymap = keyconfigs_addon.keymaps.find("3D View", space_type="VIEW_3D")
+        keymap = keyconfigs_addon.keymaps.find("3D View", space_type='VIEW_3D')
         keymap_item = keymap.keymap_items.find_from_operator(idname="syncview.report_active_area")
 
         logger = logging.getLogger(__name__)
