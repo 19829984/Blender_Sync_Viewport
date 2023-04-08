@@ -15,14 +15,14 @@ class SyncDrawHandler:
     def __init__(self):
         self.active_space: bpy.types.Space = None
 
-        self._handlers: List[object] = []
+        self._handler: object = None
         self._active_window: bpy.types.Window = None
         self._logger: logging.Logger = logging.getLogger(__name__ + ".SyncDrawHandler")
         self._space_map: Dict[bpy.types.Space, (bpy.types.WorkSpace, bpy.types.Screen)] = dict()
         self._preferences: bpy.types.AddonPreferences = bpy.context.preferences.addons[__package__].preferences
         self._lock_sync: bool = False  # Rendering is done on a separate thread, this is to prevent race conditions
         self._last_viewport_attrs: list = []
-        self.__add_handlers()
+        self.__add_handler()
 
     def set_active_window(self, new_window: bpy.types.Window) -> None:
         '''
@@ -115,11 +115,10 @@ class SyncDrawHandler:
 
     # Handler order: PRE_VIEW, POST_VIEW, POST_PIXEL
 
-    def __add_handlers(self) -> None:
-        self._handlers.append(bpy.types.SpaceView3D.draw_handler_add(
-            self.sync_draw_callback, (), 'WINDOW', 'PRE_VIEW'))
+    def __add_handler(self) -> None:
+        '''Add a draw handler to bpy.types.SpapceView3D from this class'''
+        self._handler = bpy.types.SpaceView3D.draw_handler_add(self.sync_draw_callback, (), 'WINDOW', 'PRE_VIEW')
         self._logger.info("Adding a sync view draw handler")
-        self._logger.info("Handlers: " + str(self._handlers))
 
     def __has_viewport_changed(self, space: bpy.types.Space) -> bool:
         if not self._last_viewport_attrs:
@@ -164,14 +163,13 @@ class SyncDrawHandler:
         self.__rebuild_space_map(self._active_window)
         self._lock_sync = False
 
-    def remove_handlers(self) -> None:
-        self._logger.info("Removing sync view draw handlers")
-        for handler in self._handlers:
-            bpy.types.SpaceView3D.draw_handler_remove(handler, 'WINDOW')
-        self._handlers = []
+    def remove_handler(self) -> None:
+        self._logger.info("Removing sync view draw handler")
+        bpy.types.SpaceView3D.draw_handler_remove(self._handler, 'WINDOW')
+        self._handler = None
 
-    def has_handlers(self) -> bool:
-        return len(self._handlers) > 0
+    def has_handler(self) -> bool:
+        return self._handler is not None
 
     def sync_draw_callback(self) -> None:
         this_space = bpy.context.space_data
