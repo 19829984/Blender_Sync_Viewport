@@ -7,7 +7,7 @@ import logging
 class SYNC_VIEW_EVENTKEYMAP_OT_mouse_move(bpy.types.Operator):
     """
     This operator reports the active area to our draw handler, is meant to be called through a keymap on mouse move
-    Adopted from https://blender.stackexchange.com/questions/267285/alternative-to-modal-operators-blocked-autosave
+    Adapted from https://blender.stackexchange.com/questions/267285/alternative-to-modal-operators-blocked-autosave
     """
     bl_idname = "syncview.report_active_area"
     bl_label = "Report Active Area"
