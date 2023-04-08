@@ -43,7 +43,7 @@ class SYNC_VIEW_VIEW3D_PT_setting_panel(SyncViewPanel):
 class SYNC_VIEW_VIEW3D_PT_sync_mode_panel(SyncViewPanel):
     """Settings for Sync View"""
     bl_label = "Sync Mode"
-    bl_parent_id = "SYNC_VIEWVIEW3D_PT_setting_panel"
+    bl_parent_id = "SYNC_VIEW_VIEW3D_PT_setting_panel"
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
