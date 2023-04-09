@@ -18,7 +18,7 @@ bl_info = {
     "author": "Bowen Wu",
     "description": "Syncs specified viewports to have the same views",
     "blender": (2, 80, 3),
-    "version": (1, 0, 0),
+    "version": (1, 0, 2),
     "location": "View3D > Header Bar",
     "warning": "",
     "category": "3D View"
