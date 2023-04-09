@@ -145,10 +145,10 @@ def unregister():
         del bpy.app.driver_namespace['sync_view']
 
     # Reset attributes, it's not supposed to be True outside of this addon
-    for window in bpy.context.window_manager.windows:
-        for area in window.screen.areas:
+    for screen in bpy.context.blend_data.screens:
+        for area in screen.areas:
             if area.type == 'VIEW_3D':
-                area.spaces[0].region_3d.show_sync_view = False
+                area.spaces.active.region_3d.show_sync_view = False
 
     keyconfigs_addon = bpy.context.window_manager.keyconfigs.addon
     if keyconfigs_addon:
