@@ -1,5 +1,5 @@
 # Sync Viewport
-Sync View Version 1.0.0:
+Sync View Version 1.0.1:
 * Can selectively sync viewports together
     * Only the view is synced, everything else can be configured independently as usual
         * i.e. two viewports can be sync where one displays wireframe while the other displays material preview
