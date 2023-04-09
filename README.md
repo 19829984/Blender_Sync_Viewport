@@ -1,4 +1,18 @@
 # Sync Viewport
+Inspired by ZBrush's thumbnail view, which can shows a synced silhouette view of your sculpt as your work, this addon aims to provide a similar functionality to Blender.
+
+With Sync Viewport installed, you can choose what viewports you want to sync together via a toggle-able button in the header region. The addon also offers 3 different modes of syncing: 
+1. Sync only viewports in the same window
+2. Sync only viewports in the same workspace (also syncs other open windows with a 3d viewport)
+3. Sync all viewports in the blend file, which will work across workspaces
+
+If your machine isn't powerful enough to run the addon and maintain stable performance, there are also options to turn off syncs:
+1. Turn off sync temporarily
+2. Turn off sync when playing an animation
+3. Turn off sync for viewports in camera view.
+
+
+### TLDR:
 Sync View Version 1.0.1:
 * Can selectively sync viewports together
     * Only the view is synced, everything else can be configured independently as usual
