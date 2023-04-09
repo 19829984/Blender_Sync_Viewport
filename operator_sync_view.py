@@ -40,7 +40,7 @@ class SYNC_VIEW_OT_EnableSync(bpy.types.Operator):
     def execute(self, context):
         driver_namespace = bpy.app.driver_namespace
         if 'sync_view' not in driver_namespace:
-            logger = logging.getLogger(__name__ + ".SYNC_VIEWOT_EnableSync")
+            logger = logging.getLogger(__name__ + "." + __class__.__name__)
             logger.info("Adding SyncDrawHandler to driver_namespace['sync_view']")
             driver_namespace['sync_view'] = SyncDrawHandler()
 
@@ -62,7 +62,7 @@ class SYNC_VIEW_OT_DisableSync(bpy.types.Operator):
     def execute(self, context):
         driver_namespace = bpy.app.driver_namespace
         if 'sync_view' in driver_namespace and driver_namespace['sync_view'].has_handler():
-            logger = logging.getLogger(__name__ + ".SYNC_VIEW_OT_DisableSync")
+            logger = logging.getLogger(__name__ + "." + __class__.__name__)
             logger.info("Removing SyncDrawHandler to driver_namespace['sync_view']")
             del bpy.app.driver_namespace['sync_view']
 
