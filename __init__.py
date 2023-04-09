@@ -1,7 +1,7 @@
 # Check if addon is being reloaded
 # This also allows script.reload() to reload the addon
 if "operator_sync_view" not in locals():
-    from . import sync_handler, ui, operator_sync_view, msgbus, preferences
+    from . import sync_handler, ui, operator_sync_view, msgbus, preferences, handlers
 else:
     import importlib
     sync_handler = importlib.reload(sync_handler)
@@ -9,8 +9,9 @@ else:
     operator_sync_view = importlib.reload(operator_sync_view)
     msgbus = importlib.reload(msgbus)
     preferences = importlib.reload(preferences)
+    handlers = importlib.reload(handlers)
 
-modules = [preferences, operator_sync_view, msgbus, ui]
+modules = [preferences, operator_sync_view, msgbus, ui, handlers]
 
 bl_info = {
     "name": "Viewport Sync",
