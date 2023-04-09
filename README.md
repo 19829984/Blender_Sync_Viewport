@@ -13,7 +13,7 @@ If your machine isn't powerful enough to run the addon and maintain stable perfo
 
 
 ### TLDR:
-Sync View Version 1.0.1:
+Sync View Version 1.0.2:
 * Can selectively sync viewports together
     * Only the view is synced, everything else can be configured independently as usual
         * i.e. two viewports can be sync where one displays wireframe while the other displays material preview
