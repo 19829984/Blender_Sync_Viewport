@@ -35,9 +35,6 @@ class SyncDrawHandler:
         self._last_viewport_attrs: list = []
         self.__add_handler()
 
-    def __del__(self):
-        self.__remove_handler()
-
     def set_active_window(self, new_window: bpy.types.Window) -> None:
         """
         Update the stored active window. If the new window is different than the old one,
@@ -151,7 +148,7 @@ class SyncDrawHandler:
         self._handler = bpy.types.SpaceView3D.draw_handler_add(self.sync_draw_callback, (), 'WINDOW', 'PRE_VIEW')
         self._logger.info("Adding a sync view draw handler")
 
-    def __remove_handler(self) -> None:
+    def remove_handler(self) -> None:
         """
         Remove the draw handler from this class from bpy.types.SpapceView3D
         """

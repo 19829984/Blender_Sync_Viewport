@@ -11,7 +11,7 @@ else:
     preferences = importlib.reload(preferences)
     handlers = importlib.reload(handlers)
 
-modules = [preferences, operator_sync_view, msgbus, ui, handlers]
+modules = [preferences, operator_sync_view, ui, handlers, msgbus]
 
 bl_info = {
     "name": "Viewport Sync",

@@ -64,6 +64,7 @@ class SYNC_VIEW_OT_DisableSync(bpy.types.Operator):
         if 'sync_view' in driver_namespace and driver_namespace['sync_view'].has_handler():
             logger = logging.getLogger(__name__ + "." + __class__.__name__)
             logger.info("Removing SyncDrawHandler to driver_namespace['sync_view']")
+            bpy.app.driver_namespace['sync_view'].remove_handler()
             del bpy.app.driver_namespace['sync_view']
 
         return {'FINISHED'}
@@ -140,6 +141,7 @@ def register():
 def unregister():
     driver_namespace = bpy.app.driver_namespace
     if 'sync_view' in driver_namespace and driver_namespace['sync_view'].has_handler():
+        driver_namespace['sync_view'].remove_handler()
         del bpy.app.driver_namespace['sync_view']
 
     # Reset attributes, it's not supposed to be True outside of this addon
