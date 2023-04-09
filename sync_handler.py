@@ -31,7 +31,6 @@ class SyncDrawHandler:
         self._active_window: bpy.types.Window = None
         self._logger: logging.Logger = logging.getLogger(__name__ + ".SyncDrawHandler")
         self._space_map: Dict[bpy.types.Space, (bpy.types.WorkSpace, bpy.types.Screen)] = dict()
-        self._preferences: bpy.types.AddonPreferences = bpy.context.preferences.addons[__package__].preferences
         self._lock_sync: bool = False  # Rendering is done on a separate thread, this is to prevent race conditions
         self._last_viewport_attrs: list = []
         self.__add_handler()
@@ -80,7 +79,8 @@ class SyncDrawHandler:
         Args:
             window (bpy.types.Window): window to have viewports synced in
         """
-        sync_mode = self._preferences.sync_modes[self._preferences.sync_mode]
+        preferences = bpy.context.preferences.addons[__package__].preferences
+        sync_mode = preferences.sync_modes[preferences.sync_mode]
         match sync_mode:
             # Window Sync
             case 0:
@@ -253,6 +253,7 @@ class SyncDrawHandler:
         - self.__has_viewport_changed(bpy.context.space_data) returns false
         """
         this_space = bpy.context.space_data
+        preferences = bpy.context.preferences.addons[__package__].preferences
 
         if not bpy.context.region_data.show_sync_view or not self.active_space:
             self._space_map.pop(this_space, None)
@@ -267,13 +268,13 @@ class SyncDrawHandler:
         if self._lock_sync:
             return
 
-        if self._preferences.pause_sync:
+        if preferences.pause_sync:
             return
 
-        if bpy.context.screen.is_animation_playing and not self._preferences.sync_playback:
+        if bpy.context.screen.is_animation_playing and not preferences.sync_playback:
             return
 
-        if not self._preferences.sync_camera_view and bpy.context.space_data.region_3d.view_perspective == 'CAMERA':
+        if not preferences.sync_camera_view and bpy.context.space_data.region_3d.view_perspective == 'CAMERA':
             return
 
         # Use the workspace of an open window instead of bpy.context.workspace
@@ -288,7 +289,7 @@ class SyncDrawHandler:
             elif (self.__has_viewport_changed(this_space)):
                 self.__store_viewport_attrs(this_space)
 
-                sync_mode = self._preferences.sync_modes[self._preferences.sync_mode]
+                sync_mode = preferences.sync_modes[preferences.sync_mode]
 
                 spaces_to_sync = set()
                 spaces = self._space_map.keys()
