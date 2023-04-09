@@ -12,5 +12,18 @@ Sync View Version 1.0.1:
     * Pause sync during playback
     * Don't sync viewports in camera view
 
+
+## Syncing Viewports in the same window
+
+https://user-images.githubusercontent.com/57331630/230760376-cbddfac8-4525-430b-9dcd-80f7ec0b40ab.mp4
+
+
+## Syncing Viewports in the same workspace
+
+https://user-images.githubusercontent.com/57331630/230760556-eb94e3b8-ca40-443d-8523-286e3c922c6e.mp4
+
+
+
+
 Known Minor Issue:
 If a viewport is syncing and it enters quad view, all quad view settings will be set to false. 
