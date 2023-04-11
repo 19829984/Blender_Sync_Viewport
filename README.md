@@ -10,7 +10,7 @@ Sync View Version 1.0.2:
     * Only the view is synced, everything else can be configured independently as usual
         * i.e. two viewports can be sync where one displays wireframe while the other displays material preview
 * Works in all Object Modes
-* Thee sync modes for viewports with sync enabled:
+* Three sync modes for viewports with sync enabled:
     * Sync all viewports in the same window
     * Sync all viewports in the same workspace (also syncs other open windows with a 3d viewport)
     * Sync all viewports in the blend file, which will work across workspaces
